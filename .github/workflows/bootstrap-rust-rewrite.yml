@@ -4,9 +4,20 @@ on:
   push:
     branches:
       - agent/rust-native-runtime
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - synchronize
+      - reopened
 
 permissions:
   contents: write
+
+concurrency:
+  group: rust-rewrite-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   rewrite:
@@ -16,6 +27,7 @@ jobs:
       - name: Check out branch
         uses: actions/checkout@v4
         with:
+          ref: ${{ github.head_ref || github.ref_name }}
           fetch-depth: 0
 
       - name: Install Rust toolchain
@@ -57,6 +69,7 @@ jobs:
           cargo run -- eval 'assert(6 * 7 == 42, "evaluation failed"); print("eval ok");'
 
       - name: Commit verified Rust rewrite
+        if: github.event_name == 'pull_request'
         shell: bash
         run: |
           set -euo pipefail
