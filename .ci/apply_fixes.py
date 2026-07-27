@@ -16,6 +16,18 @@ def replace_once(path: str, old: str, new: str) -> None:
     raise SystemExit(f"expected text was not found in {path}: {old!r}")
 
 
+def ensure_single_crate_attribute(path: str, attribute: str) -> None:
+    file = Path(path)
+    text = file.read_text(encoding="utf-8")
+    body = "\n".join(line for line in text.splitlines() if line != attribute).lstrip("\n")
+    normalized = f"{attribute}\n\n{body}\n"
+    if text == normalized:
+        print(f"already normalized {path}")
+        return
+    file.write_text(normalized, encoding="utf-8")
+    print(f"normalized {path}")
+
+
 # Compiler compatibility fixes found by the first Rust build.
 replace_once(
     "src/interpreter.rs",
@@ -30,10 +42,9 @@ replace_once(
 
 # Nilo errors deliberately retain rich source spans, snippets, and notes. Boxing
 # them would make every public Result harder to use for little practical gain.
-replace_once(
+ensure_single_crate_attribute(
     "src/lib.rs",
-    "//! Nilo language implementation.",
-    "#![allow(clippy::result_large_err)]\n\n//! Nilo language implementation.",
+    "#![allow(clippy::result_large_err)]",
 )
 
 # Apply the actionable Clippy suggestions without weakening the lint policy.
