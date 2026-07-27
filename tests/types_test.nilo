@@ -1,0 +1,18 @@
+type User {
+    name: str;
+    age: int;
+    tags: list<str>;
+}
+
+func birthday(user: User) -> User {
+    user.age = user.age + 1;
+    return user;
+}
+
+let user: User = User("Ada", 36, ["compiler", "math"]);
+birthday(user);
+assert(user.age == 37, "record mutation failed");
+assert(type_of(user) == "User", "type_of failed");
+
+let maybe_user: User? = nil;
+assert(maybe_user == nil, "nullable type failed");

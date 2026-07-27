@@ -1,135 +1,110 @@
 # Nilo
 
-Niloは、読みやすい構文、シンプルなモジュール、育てやすい実装を目指した小さなプログラミング言語です。
+Niloは、Rustで実装された小さく読みやすいプログラミング言語です。単一の`nilo`コマンドに、インタプリタ、状態を保持するREPL、モジュール、実行時型検証、プロジェクトマニフェスト、テストランナー、開発者向け解析機能をまとめています。
 
-現在の実装はPython製のアルファ版インタプリタです。実行時依存はありません。
+> **現在の状態:** Nilo 0.2はアルファ版です。実験や小さなツールには利用できますが、1.0までは構文や標準ライブラリが変更される可能性があります。
 
-## 特徴
+## インストール
 
-- `let` による変数定義
-- `func` と `return` による関数
-- 数値、文字列、真偽値、リスト、map、添字アクセス
-- `if` / `else`、`while`、`for ... in`
-- `type` による軽量なレコード風の型宣言
-- `export`、`import`、`from ... import ...` によるファイルモジュール
-- `std/json`、`std/regex`、`std/fs`、`std/http`、`std/time` などの標準モジュール
-- CLI、REPL、プロジェクト初期化、テスト実行、トークン表示、AST表示
-
-## はじめ方
+ビルド済みリリースを整備している間は、Rustツールチェーンからインストールできます。
 
 ```bash
-uv pip install -e .
-uv run nilo run examples/main.nilo
+cargo install --git https://github.com/nullx2-x/nilo-lang
+nilo --version
 ```
 
-サブコマンド:
+このリポジトリを直接ビルドする場合:
 
 ```bash
-uv run nilo run examples/main.nilo
-uv run nilo test
-uv run nilo init my-app
-uv run nilo tokens examples/main.nilo
-uv run nilo ast examples/main.nilo
+cargo build --release
+./target/release/nilo examples/main.nilo
+```
+
+## すぐに試す
+
+```bash
+# ファイルを直接実行
+nilo examples/main.nilo
+
+# Nilo.tomlで指定したエントリを実行
+nilo run
+
+# コマンドライン上のコードを実行
+nilo -e 'print("Hello from Nilo")'
+
+# 状態を保持するREPL
+nilo
+
+# 構文確認とテスト
+nilo check examples/main.nilo
+nilo test
+
+# 新規プロジェクト作成
+nilo init my-app
+cd my-app
+nilo run
 ```
 
 ## コード例
 
 ```nilo
-from "math_tools" import add, sum_to;
-import "messages" as messages;
+from "math_tools" import add;
 import "std/json" as json;
-import "std/regex" as regex;
 
-let total = add(10, 20);
-let payload = {"name": "nilo", "total": total};
-
-print(messages.banner);
-print(total);
-print(sum_to(5));
-print(json.stringify(payload));
-print(regex.is_match("^[a-z]+$", "nilo"));
-```
-
-## モジュール
-
-値や関数を公開するには `export` を使います。
-
-```nilo
-export let answer = 42;
-
-export func double(x: int) -> int {
-    return x * 2;
+type Point {
+    x: int;
+    y: int;
 }
+
+func magnitude_squared(point: Point) -> int {
+    return point.x * point.x + point.y * point.y;
+}
+
+let point: Point = Point(3, 4);
+let values: list<int> = [1, 2, 3];
+push(values, add(point.x, point.y));
+
+print(json.stringify({
+    "point": point,
+    "score": magnitude_squared(point),
+    "values": values
+}, true));
 ```
 
-モジュール全体を読み込む場合:
+## 主な機能
 
-```nilo
-import "tools" as tools;
-print(tools.answer);
+- `let`、関数、再帰、クロージャ、レコード型
+- 整数、浮動小数、真偽値、文字列、リスト、map、`nil`
+- `if` / `else if` / `else`、`while`、`for ... in`、`break`、`continue`
+- `int`、`User?`、`list<str>`、`map<str, any>`などの実行時型検証
+- 変数、レコードフィールド、リスト添字、map添字への代入
+- `export`、`import`、`from ... import ...`によるファイルモジュール
+- `std/json`、`std/regex`、`std/fs`、`std/http`、`std/time`、`std/list`、`std/string`、`std/math`
+- 行・列とソース抜粋を表示するエラー診断
+- CLI、永続REPL、プロジェクト初期化、テスト、トークン表示、AST表示
+
+## コマンド
+
+```text
+nilo                         REPLを開始
+nilo <file.nilo>             ソースファイルを実行
+nilo run [file.nilo]         ファイルまたはNilo.tomlのentryを実行
+nilo eval <source>           コード文字列を実行
+nilo -e <source>             コード文字列を実行
+nilo check <file.nilo>       実行せず構文を確認
+nilo test [path]             *_test.niloを再帰的に実行
+nilo init [path] [--name N]  新規プロジェクトを作成
+nilo tokens <file.nilo>      トークンをJSONで表示
+nilo ast <file.nilo>         ASTをJSONで表示
 ```
 
-名前を選んで読み込む場合:
+## プロジェクト構成
 
-```nilo
-from "tools" import answer, double;
-print(double(answer));
-```
-
-相対importは、importしているファイルからの相対パスとして解決されます。`.nilo` 拡張子は省略できます。
-
-## 正規表現
-
-`std/regex` はPythonの正規表現エンジンを利用した強力な正規表現APIです。名前付きキャプチャ、置換、分割、全件検索、フラグ指定に対応しています。
-
-```nilo
-import "std/regex" as regex;
-
-let email = regex.find("(?P<user>[\\w.]+)@(?P<host>[\\w.]+)", "dev@example.com");
-print(email.named.user);
-
-let words = regex.find_all("\\w+", "Nilo speaks many languages");
-print(len(words));
-
-let slug = regex.replace("\\s+", "Nilo Language", "-");
-print(slug);
-```
-
-利用できる関数:
-
-- `compile(pattern, flags?)`
-- `is_match(pattern, text, flags?)`
-- `find(pattern, text, flags?)`
-- `find_all(pattern, text, flags?)`
-- `captures(pattern, text, flags?)`
-- `replace(pattern, text, replacement, flags?)`
-- `split(pattern, text, flags?)`
-- `escape(text)`
-
-フラグは `regex.flags` から利用できます。
-
-```nilo
-import "std/regex" as regex;
-
-let flags = regex.flags.ignore_case;
-print(regex.is_match("nilo", "NILO", flags));
-```
-
-利用可能なフラグ:
-
-- `ignore_case`
-- `multiline`
-- `dot_all`
-- `verbose`
-- `ascii`
-
-## パッケージ
-
-アルファ版では、Niloプロジェクトは通常のディレクトリとして共有できます。`Nilo.toml` にパッケージ情報と公開モジュールを書きます。
+`Nilo.toml`を置いた通常のディレクトリがNiloパッケージになります。
 
 ```toml
 [package]
-name = "my-package"
+name = "my-app"
 version = "0.1.0"
 entry = "src/main.nilo"
 
@@ -137,8 +112,20 @@ entry = "src/main.nilo"
 main = "src/main.nilo"
 ```
 
-将来的には、この形式を使って `nilo add`、`nilo run`、lockfile、パッケージ公開などを実装する予定です。
+詳細は[言語ガイド](docs/LANGUAGE.md)と[パッケージガイド](docs/PACKAGES.md)を参照してください。
 
-## 状態
+## 開発
 
-Niloはまだ実験段階です。次の大きな作業候補は、型チェック、より良い診断表示、パッケージ管理、Rust製VMまたはコンパイラバックエンドです。
+```bash
+cargo fmt --all -- --check
+cargo clippy --all-targets --all-features -- -D warnings
+cargo test --all-targets
+cargo run -- examples/main.nilo
+cargo run -- test tests
+```
+
+実装は字句解析、構文解析、AST、値、環境、インタプリタ、標準ライブラリ、CLIに分離しています。将来、フロントエンドを維持したままバイトコードVMやネイティブコンパイラへ発展させられる構造です。
+
+## ライセンス
+
+MIT

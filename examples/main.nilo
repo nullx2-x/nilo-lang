@@ -1,25 +1,31 @@
-from "math_tools" import add, sum_to;
+from "math_tools" import add, sum_to, fibonacci;
 import "messages" as messages;
 import "std/json" as json;
 import "std/regex" as regex;
+import "std/list" as list;
 
 type Point {
     x: int;
     y: int;
 }
 
-let point = Point(3, 4);
-let values = [1, 2, 3];
-let payload = {"name": "nilo", "score": 7};
+let point: Point = Point(3, 4);
+let values: list<int> = [1, 2, 3];
+list.push(values, 5);
+
+let payload: map<str, any> = {
+    "language": "nilo",
+    "point": point,
+    "sum": add(point.x, point.y),
+    "sum_to_5": sum_to(5),
+    "fib_10": fibonacci(10),
+    "values": values
+};
 
 print(messages.banner);
-print(add(point.x, point.y));
-print(sum_to(5));
-print(len(values));
-
-for value in values {
-    print(value);
-}
-
-print(json.stringify(payload));
-print(regex.is_match("^[a-z]+$", "nilo"));
+print("point total =", payload.sum);
+print("JSON =", json.stringify(payload, true));
+print(
+    "identifier =",
+    regex.is_match("^[a-z_][a-z0-9_]*$", "nilo_lang", regex.flags.ignore_case)
+);

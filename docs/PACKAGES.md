@@ -1,16 +1,14 @@
-# Nilo Package Draft
+# Nilo Packages
 
-Nilo packages are plain directories that can be hosted on GitHub, copied locally, or published later to a registry.
+A Nilo package is a directory containing `Nilo.toml`. The current format is intentionally small and stable enough for local projects and Git repositories.
 
 ## Manifest
-
-Use `Nilo.toml` at the package root:
 
 ```toml
 [package]
 name = "my-package"
 version = "0.1.0"
-description = "Reusable Nilo utilities."
+description = "Reusable Nilo utilities"
 entry = "src/main.nilo"
 
 [exports]
@@ -18,49 +16,32 @@ math = "src/math.nilo"
 strings = "src/strings.nilo"
 ```
 
-The current interpreter does not require this file to run modules. It is a stable project convention for sharing code before a package manager exists.
+`nilo run` searches for `Nilo.toml` from the current directory upward and executes `package.entry`. The `[exports]` table documents public modules for tooling and a future package manager; file imports work directly today.
 
-## Recommended Layout
+## Recommended layout
 
 ```text
 my-package/
-  Nilo.toml
-  README.md
-  src/
-    main.nilo
-    math.nilo
-  tests/
-    smoke.nilo
+├── Nilo.toml
+├── README.md
+├── src/
+│   ├── main.nilo
+│   └── math.nilo
+└── tests/
+    └── math_test.nilo
 ```
 
-## Module Imports
+## Commands
 
-Relative imports use source files directly:
-
-```nilo
-from "math" import add;
-import "strings" as strings;
+```bash
+nilo init my-package
+cd my-package
+nilo run
+nilo test
 ```
 
-The `.nilo` extension is optional. Imports are resolved relative to the file doing the import.
+The test runner discovers files ending in `_test.nilo` recursively. Tests should use the built-in `assert` function; an assertion failure produces a non-zero process exit.
 
-## Distribution Today
+## Distribution
 
-For now, distribute packages by GitHub URL or by copying the package directory into a project.
-
-Recommended release checklist:
-
-1. Add a `Nilo.toml` manifest.
-2. Keep public modules listed under `[exports]`.
-3. Tag releases with semantic versions such as `v0.1.0`.
-4. Include examples that can run with `python3 -m nilo path/to/example.nilo`.
-
-## Future Package Manager
-
-A future `nilo` package manager can use this same manifest to support:
-
-- `nilo init`
-- `nilo add github:user/repo`
-- `nilo run`
-- lockfiles
-- package publishing
+Until a registry and lockfile format are defined, distribute Nilo packages as versioned Git repositories or directories. Tag public releases using semantic versions and keep exported modules listed in `Nilo.toml`.

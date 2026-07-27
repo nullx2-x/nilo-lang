@@ -1,0 +1,96 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install stable Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - name: Cache Cargo data
+        uses: Swatinem/rust-cache@v2
+
+      - name: Validate implementation
+        id: validate
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -o pipefail
+          {
+            cargo fmt --all -- --check &&
+            cargo clippy --locked --all-targets --all-features -- -D warnings &&
+            cargo test --locked --all-targets &&
+            cargo run --locked --quiet -- check examples/main.nilo &&
+            cargo run --locked --quiet -- examples/main.nilo &&
+            cargo run --locked --quiet -- test tests
+          } 2>&1 | tee ci-output.txt
+
+      - name: Publish CI diagnostic to the pull request
+        if: always() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        env:
+          VALIDATION_OUTCOME: ${{ steps.validate.outcome }}
+        with:
+          script: |
+            const fs = require('fs');
+            const marker = '<!-- nilo-ci-report -->';
+            const raw = fs.existsSync('ci-output.txt')
+              ? fs.readFileSync('ci-output.txt', 'utf8')
+              : 'No validation output was produced.';
+            const output = raw.length > 55000
+              ? raw.slice(raw.length - 55000)
+              : raw;
+            const icon = process.env.VALIDATION_OUTCOME === 'success' ? '✅' : '❌';
+            const body = `${marker}\n### ${icon} Nilo Rust validation\n\n` +
+              `<details><summary>cargo output</summary>\n\n\`\`\`text\n${output}\n\`\`\`\n</details>`;
+            const { owner, repo } = context.repo;
+            const issue_number = context.issue.number;
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner,
+              repo,
+              issue_number,
+              per_page: 100,
+            });
+            const existing = comments.find(comment =>
+              comment.user?.type === 'Bot' && comment.body?.includes(marker)
+            );
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner,
+                repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({ owner, repo, issue_number, body });
+            }
+
+      - name: Fail when validation failed
+        if: steps.validate.outcome == 'failure'
+        run: exit 1
+
+  msrv:
+    name: Rust 1.86 compatibility
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install minimum supported Rust
+        uses: dtolnay/rust-toolchain@1.86.0
+
+      - name: Check with the declared MSRV
+        run: cargo check --locked

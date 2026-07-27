@@ -1,1 +1,1 @@
-export let banner = "Nilo example";
+export let banner: str = "Nilo — a small language with a Rust heart";

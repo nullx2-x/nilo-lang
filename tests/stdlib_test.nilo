@@ -1,0 +1,11 @@
+import "std/list" as list;
+import "std/string" as string;
+import "std/math" as math;
+
+let words = string.split("nilo rust language", " ");
+assert(list.join(words, "-") == "nilo-rust-language", "string/list modules failed");
+assert(string.upper("Nilo") == "NILO", "upper failed");
+assert(string.trim("  nilo  ") == "nilo", "trim failed");
+assert(math.abs(-7) == 7, "abs failed");
+assert(math.min(8, 3, 5) == 3, "min failed");
+assert(math.max(8, 3, 5) == 8, "max failed");

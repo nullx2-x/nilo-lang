@@ -1,0 +1,27 @@
+[package]
+name = "nilo-lang"
+version = "0.2.0"
+edition = "2021"
+rust-version = "1.86"
+description = "Nilo: a small, readable programming language implemented in Rust"
+license = "MIT"
+repository = "https://github.com/nullx2-x/nilo-lang"
+readme = "README.md"
+keywords = ["language", "interpreter", "parser", "cli"]
+categories = ["command-line-utilities", "compilers"]
+
+[[bin]]
+name = "nilo"
+path = "src/main.rs"
+
+[dependencies]
+regex = "1.11"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+toml = "0.8"
+ureq = { version = "2.12", default-features = true }
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+strip = true
