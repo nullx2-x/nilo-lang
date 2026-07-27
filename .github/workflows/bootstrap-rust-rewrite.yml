@@ -7,6 +7,12 @@ on:
     paths:
       - .bootstrap/**
       - .github/workflows/bootstrap-rust-rewrite.yml
+  pull_request:
+    branches:
+      - main
+    paths:
+      - .bootstrap/**
+      - .github/workflows/bootstrap-rust-rewrite.yml
 
 permissions:
   contents: write
@@ -17,6 +23,7 @@ concurrency:
 
 jobs:
   unpack:
+    if: github.repository == 'nullx2-x/nilo-lang'
     runs-on: ubuntu-latest
     steps:
       - name: Check out rewrite branch
