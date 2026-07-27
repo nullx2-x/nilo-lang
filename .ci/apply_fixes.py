@@ -82,6 +82,11 @@ replace_once(
 """,
 )
 replace_once(
+    "src/interpreter.rs",
+    "maximum.map_or(true, |maximum| actual <= maximum)",
+    "maximum.is_none_or(|maximum| actual <= maximum)",
+)
+replace_once(
     "src/parser.rs",
     "return self.from_import_statement(self.previous().span);",
     "return self.parse_from_import_statement(self.previous().span);",
