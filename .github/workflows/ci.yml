@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main, agent/rust-rewrite]
+    branches: [main]
   pull_request:
 
 permissions:
@@ -32,11 +32,11 @@ jobs:
           set -o pipefail
           {
             cargo fmt --all -- --check &&
-            cargo clippy --all-targets --all-features -- -D warnings &&
-            cargo test --all-targets &&
-            cargo run --quiet -- check examples/main.nilo &&
-            cargo run --quiet -- examples/main.nilo &&
-            cargo run --quiet -- test tests
+            cargo clippy --locked --all-targets --all-features -- -D warnings &&
+            cargo test --locked --all-targets &&
+            cargo run --locked --quiet -- check examples/main.nilo &&
+            cargo run --locked --quiet -- examples/main.nilo &&
+            cargo run --locked --quiet -- test tests
           } 2>&1 | tee ci-output.txt
 
       - name: Publish CI diagnostic to the pull request
@@ -82,3 +82,15 @@ jobs:
       - name: Fail when validation failed
         if: steps.validate.outcome == 'failure'
         run: exit 1
+
+  msrv:
+    name: Rust 1.78 compatibility
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install minimum supported Rust
+        uses: dtolnay/rust-toolchain@1.78.0
+
+      - name: Check with the declared MSRV
+        run: cargo check --locked
