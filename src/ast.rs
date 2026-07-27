@@ -20,7 +20,7 @@ impl Span {
     }
 
     #[must_use]
-    pub const fn merge(self, other: Self) -> Self {
+    pub fn merge(self, other: Self) -> Self {
         let end = other.offset + other.length;
         Self {
             line: self.line,

@@ -1875,7 +1875,7 @@ fn module_name(path: &str) -> String {
 fn unix_time_seconds() -> Result<f64> {
     SystemTime::now()
         .duration_since(UNIX_EPOCH)
-        .map(Duration::as_secs_f64)
+        .map(|duration| duration.as_secs_f64())
         .map_err(|error| NiloError::runtime(format!("system clock error: {error}")))
 }
 
