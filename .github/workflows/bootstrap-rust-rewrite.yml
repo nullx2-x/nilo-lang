@@ -8,6 +8,7 @@ on:
       - .bootstrap/**
       - .github/workflows/bootstrap-rust-rewrite.yml
   pull_request:
+    types: [opened, reopened, synchronize, ready_for_review]
     branches:
       - main
     paths:
