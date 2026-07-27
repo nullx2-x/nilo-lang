@@ -10,17 +10,17 @@ permissions:
   pull-requests: write
 
 concurrency:
-  group: rust-rewrite-validation
+  group: rust-rewrite-fix-validation
   cancel-in-progress: false
 
 jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
-      - name: Check out validation branch
+      - name: Check out fix branch
         uses: actions/checkout@v4
         with:
-          ref: agent/rust-rewrite-validate
+          ref: agent/rust-rewrite-fix
           fetch-depth: 0
 
       - name: Install stable Rust
@@ -31,17 +31,18 @@ jobs:
       - name: Cache Cargo data
         uses: Swatinem/rust-cache@v2
 
-      - name: Format Rust source
+      - name: Apply fixes and format Rust source
         shell: bash
         run: |
           set -euo pipefail
+          python3 .ci/apply_fixes.py
           cargo fmt --all
           if ! git diff --quiet; then
             git config user.name 'github-actions[bot]'
             git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
             git add -A
-            git commit -m 'style: format Rust rewrite'
-            git push origin HEAD:agent/rust-rewrite-validate
+            git commit -m 'fix: resolve Rust compiler errors'
+            git push origin HEAD:agent/rust-rewrite-fix
           fi
 
       - name: Validate Rust and Nilo implementation
@@ -62,7 +63,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: nilo-rust-validation
+          name: nilo-rust-validation-fix
           path: validation.log
           if-no-files-found: warn
 
