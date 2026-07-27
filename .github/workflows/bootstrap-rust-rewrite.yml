@@ -1,14 +1,8 @@
 name: Bootstrap Rust rewrite
 
 on:
-  push:
-    branches:
-      - agent/rust-rewrite
-    paths:
-      - .bootstrap/**
-      - .github/workflows/bootstrap-rust-rewrite.yml
   pull_request:
-    types: [opened, reopened, synchronize, ready_for_review]
+    types: [opened, reopened, synchronize]
     branches:
       - main
     paths:
@@ -19,7 +13,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: bootstrap-rust-rewrite
+  group: bootstrap-rust-rewrite-v2
   cancel-in-progress: false
 
 jobs:
@@ -30,7 +24,7 @@ jobs:
       - name: Check out rewrite branch
         uses: actions/checkout@v4
         with:
-          ref: agent/rust-rewrite
+          ref: agent/rust-rewrite-v2
           fetch-depth: 0
 
       - name: Reconstruct and verify archive
@@ -70,4 +64,4 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          git push origin HEAD:agent/rust-rewrite
+          git push origin HEAD:agent/rust-rewrite-v2
