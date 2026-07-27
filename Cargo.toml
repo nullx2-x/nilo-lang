@@ -2,7 +2,7 @@
 name = "nilo-lang"
 version = "0.2.0"
 edition = "2021"
-rust-version = "1.85"
+rust-version = "1.86"
 description = "Nilo: a small, readable programming language implemented in Rust"
 license = "MIT"
 repository = "https://github.com/nullx2-x/nilo-lang"
