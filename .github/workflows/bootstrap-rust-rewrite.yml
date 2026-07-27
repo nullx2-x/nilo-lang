@@ -32,20 +32,41 @@ jobs:
           ref: agent/rust-rewrite
           fetch-depth: 0
 
-      - name: Verify and install Rust rewrite
+      - name: Reconstruct and verify archive
         shell: bash
         run: |
           set -euo pipefail
-
-          cat .bootstrap/archive.part* | base64 --decode > /tmp/nilo-rust.tar.gz
-          echo '4b6215396f87ea5c5ec1b82048c2e32ff1b6d47880fd65f8f987c9c63f9e0943  /tmp/nilo-rust.tar.gz' | sha256sum --check --strict
+          shopt -s nullglob
+          parts=(.bootstrap/archive.part*)
+          printf 'archive chunks: %s\n' "${parts[*]}"
+          cat "${parts[@]}" | base64 --decode > /tmp/nilo-rust.tar.gz
+          actual="$(sha256sum /tmp/nilo-rust.tar.gz | cut -d' ' -f1)"
+          expected='4b6215396f87ea5c5ec1b82048c2e32ff1b6d47880fd65f8f987c9c63f9e0943'
+          printf 'archive sha256: %s\n' "$actual"
+          test "$actual" = "$expected"
           tar -tzf /tmp/nilo-rust.tar.gz >/dev/null
 
+      - name: Install Rust source tree
+        shell: bash
+        run: |
+          set -euo pipefail
           find . -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
           tar -xzf /tmp/nilo-rust.tar.gz -C .
+          test -f Cargo.toml
+          test -f src/interpreter.rs
+          test -f .github/workflows/ci.yml
 
+      - name: Commit complete rewrite
+        shell: bash
+        run: |
+          set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add -A
           git commit -m 'Rewrite Nilo interpreter and CLI in Rust'
+
+      - name: Push complete rewrite
+        shell: bash
+        run: |
+          set -euo pipefail
           git push origin HEAD:agent/rust-rewrite
