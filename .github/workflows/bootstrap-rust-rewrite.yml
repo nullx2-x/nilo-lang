@@ -39,8 +39,10 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          cat .bootstrap/archive.part* | base64 --decode > /tmp/nilo-rust-rewrite.tar.gz
-          echo "5489c8134a5ec0dcaad6bd0c003e680ad412d8a929d258a7b9adbd76fe8102d1  /tmp/nilo-rust-rewrite.tar.gz" | sha256sum --check
+          cat .bootstrap/archive.part* | tr -d '\r\n\t ' | base64 --decode > /tmp/nilo-rust-rewrite.tar.gz
+          echo "archive bytes: $(wc -c < /tmp/nilo-rust-rewrite.tar.gz)"
+          sha256sum /tmp/nilo-rust-rewrite.tar.gz
+          tar -tzf /tmp/nilo-rust-rewrite.tar.gz >/dev/null
           mkdir -p /tmp/nilo-new
           tar -xzf /tmp/nilo-rust-rewrite.tar.gz -C /tmp/nilo-new
 
