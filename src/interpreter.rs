@@ -1144,9 +1144,9 @@ impl<W: Write> Interpreter<W> {
                             .as_ref()
                             .is_some_and(|existing| existing != &value_type)
                     {
-                        return Err(NiloError::type_error(format!(
-                            "map already has an incompatible type annotation"
-                        )));
+                        return Err(NiloError::type_error(
+                            "map already has an incompatible type annotation",
+                        ));
                     }
                     map.key_type = Some(key_type.clone());
                     map.value_type = Some(value_type.clone());

@@ -38,11 +38,11 @@ impl Environment {
     pub fn define(&self, name: impl Into<String>, binding: Binding) -> bool {
         let name = name.into();
         let mut values = self.values.borrow_mut();
-        if values.contains_key(&name) {
-            false
-        } else {
-            values.insert(name, binding);
+        if let std::collections::hash_map::Entry::Vacant(entry) = values.entry(name) {
+            entry.insert(binding);
             true
+        } else {
+            false
         }
     }
 

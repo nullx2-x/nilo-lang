@@ -60,7 +60,7 @@ impl<'a> Parser<'a> {
                     "from-import declarations cannot be exported",
                 ));
             }
-            return self.from_import_statement(self.previous().span);
+            return self.parse_from_import_statement(self.previous().span);
         }
         if self.matches(TokenKind::Let) {
             return self.let_declaration(exported, self.previous().span);
@@ -95,7 +95,7 @@ impl<'a> Parser<'a> {
         })
     }
 
-    fn from_import_statement(&mut self, start: Span) -> Result<Stmt> {
+    fn parse_from_import_statement(&mut self, start: Span) -> Result<Stmt> {
         let path = self.consume_string("expected a quoted module path after from")?;
         self.consume(TokenKind::Import, "expected 'import' after module path")?;
         let mut names = Vec::new();
@@ -217,10 +217,11 @@ impl<'a> Parser<'a> {
                 ty,
                 span: field.span,
             });
-            if !self.matches(TokenKind::Comma) && !self.matches(TokenKind::Semicolon) {
-                if !self.check(TokenKind::RightBrace) {
-                    return Err(self.error(self.current(), "expected ',', ';', or '}' after field"));
-                }
+            if !self.matches(TokenKind::Comma)
+                && !self.matches(TokenKind::Semicolon)
+                && !self.check(TokenKind::RightBrace)
+            {
+                return Err(self.error(self.current(), "expected ',', ';', or '}' after field"));
             }
         }
         let end = self.consume(TokenKind::RightBrace, "expected '}' after type fields")?;

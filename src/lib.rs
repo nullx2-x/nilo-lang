@@ -1,3 +1,5 @@
+#![allow(clippy::result_large_err)]
+
 //! Nilo language implementation.
 //!
 //! The public API exposes the lexer, parser, runtime values, and interpreter so

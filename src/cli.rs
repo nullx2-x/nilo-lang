@@ -285,7 +285,7 @@ fn init_command(args: &[String]) -> Result<()> {
             option if option.starts_with('-') => {
                 return Err(NiloError::cli(format!("unknown init option '{option}'")));
             }
-            value if path == PathBuf::from(".") => path = PathBuf::from(value),
+            value if path == Path::new(".") => path = PathBuf::from(value),
             _ => return Err(NiloError::cli("usage: nilo init [path] [--name NAME]")),
         }
         index += 1;
