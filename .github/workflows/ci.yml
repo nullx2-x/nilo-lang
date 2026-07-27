@@ -84,13 +84,13 @@ jobs:
         run: exit 1
 
   msrv:
-    name: Rust 1.78 compatibility
+    name: Rust 1.85 compatibility
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
       - name: Install minimum supported Rust
-        uses: dtolnay/rust-toolchain@1.78.0
+        uses: dtolnay/rust-toolchain@1.85.0
 
       - name: Check with the declared MSRV
         run: cargo check --locked
