@@ -35,61 +35,23 @@ jobs:
         with:
           components: rustfmt, clippy
 
-      - name: Reconstruct and verify implementation archive
-        id: archive
-        continue-on-error: true
-        shell: bash
-        run: |
-          set -o pipefail
-          python3 - <<'PY' 2>&1 | tee /tmp/archive-diagnostics.txt
-          from pathlib import Path
-          import base64
-          import gzip
-          import hashlib
-          import io
-          import string
-          import tarfile
-
-          paths = sorted(Path('.bootstrap').glob('archive.part*'))
-          print('parts:', [str(path) for path in paths])
-          chunks = []
-          allowed = set(string.ascii_letters + string.digits + '+/=\r\n\t ')
-          for path in paths:
-              text = path.read_text(encoding='utf-8')
-              print(path, 'chars=', len(text), 'sha256=', hashlib.sha256(text.encode()).hexdigest())
-              invalid = sorted(set(text) - allowed)
-              print(path, 'invalid=', [hex(ord(ch)) for ch in invalid])
-              print(path, 'prefix=', repr(text[:24]), 'suffix=', repr(text[-24:]))
-              chunks.append(text)
-
-          raw = ''.join(chunks)
-          compact = ''.join(raw.split())
-          print('raw chars=', len(raw), 'compact chars=', len(compact), 'mod4=', len(compact) % 4)
-          data = base64.b64decode(compact, validate=True)
-          archive = Path('/tmp/nilo-rust-rewrite.tar.gz')
-          archive.write_bytes(data)
-          print('archive bytes=', len(data), 'sha256=', hashlib.sha256(data).hexdigest())
-          with tarfile.open(fileobj=io.BytesIO(data), mode='r:gz') as package:
-              names = package.getnames()
-              print('tar entries=', len(names), 'first=', names[:10], 'last=', names[-10:])
-              package.extractall('/tmp/nilo-new')
-          PY
-
-      - name: Persist archive diagnostics
-        if: steps.archive.outcome == 'failure'
+      - name: Reconstruct implementation archive
         shell: bash
         run: |
           set -euo pipefail
-          cp /tmp/archive-diagnostics.txt .bootstrap/diagnostics.txt
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add .bootstrap/diagnostics.txt
-          git commit -m "Record archive reconstruction diagnostics"
-          git push origin HEAD:agent/rust-native-runtime
-          exit 1
+          python3 - <<'PY'
+          from pathlib import Path
+          import base64
+          import io
+          import tarfile
+
+          compact = ''.join(''.join(path.read_text(encoding='utf-8') for path in sorted(Path('.bootstrap').glob('archive.part*'))).split())
+          data = base64.b64decode(compact, validate=True)
+          with tarfile.open(fileobj=io.BytesIO(data), mode='r:gz') as package:
+              package.extractall('/tmp/nilo-new')
+          PY
 
       - name: Replace Python prototype with Rust implementation
-        if: steps.archive.outcome == 'success'
         shell: bash
         run: |
           set -euo pipefail
@@ -97,19 +59,36 @@ jobs:
           cp -a /tmp/nilo-new/. .
 
       - name: Format Rust sources
-        if: steps.archive.outcome == 'success'
         run: cargo fmt --all
 
       - name: Compile and run Rust tests
-        if: steps.archive.outcome == 'success'
-        run: cargo test --all-targets --all-features
+        id: rust_tests
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -o pipefail
+          cargo test --all-targets --all-features 2>&1 | tee /tmp/cargo-test.log
+
+      - name: Persist sources and compiler diagnostics
+        if: steps.rust_tests.outcome == 'failure'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .ci
+          cp /tmp/cargo-test.log .ci/cargo-test.log
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Stage Rust rewrite for compiler diagnostics"
+          git push origin HEAD:agent/rust-native-runtime
+          exit 1
 
       - name: Run Nilo language regression tests
-        if: steps.archive.outcome == 'success'
+        if: steps.rust_tests.outcome == 'success'
         run: cargo run -- test tests
 
       - name: Run CLI smoke tests
-        if: steps.archive.outcome == 'success'
+        if: steps.rust_tests.outcome == 'success'
         shell: bash
         run: |
           set -euo pipefail
@@ -118,7 +97,7 @@ jobs:
           cargo run -- eval 'assert(6 * 7 == 42, "evaluation failed"); print("eval ok");'
 
       - name: Commit verified Rust rewrite
-        if: steps.archive.outcome == 'success' && github.event_name == 'pull_request'
+        if: steps.rust_tests.outcome == 'success' && github.event_name == 'pull_request'
         shell: bash
         run: |
           set -euo pipefail
