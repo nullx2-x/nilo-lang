@@ -908,7 +908,7 @@ impl<W: Write> Interpreter<W> {
         minimum: usize,
         maximum: Option<usize>,
     ) -> Result<()> {
-        let valid = actual >= minimum && maximum.map_or(true, |maximum| actual <= maximum);
+        let valid = actual >= minimum && maximum.is_none_or(|maximum| actual <= maximum);
         if valid {
             return Ok(());
         }
