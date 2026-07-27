@@ -239,9 +239,7 @@ fn run_tests(path: Option<PathBuf>) -> Result<()> {
     if failed == 0 {
         Ok(())
     } else {
-        Err(NiloError::cli(format!(
-            "{failed} Nilo test file(s) failed"
-        )))
+        Err(NiloError::cli(format!("{failed} Nilo test file(s) failed")))
     }
 }
 
@@ -279,9 +277,9 @@ fn init_command(args: &[String]) -> Result<()> {
         match args[index].as_str() {
             "--name" => {
                 index += 1;
-                let value = args.get(index).ok_or_else(|| {
-                    NiloError::cli("--name requires a project name")
-                })?;
+                let value = args
+                    .get(index)
+                    .ok_or_else(|| NiloError::cli("--name requires a project name"))?;
                 name = Some(value.clone());
             }
             option if option.starts_with('-') => {
@@ -357,11 +355,10 @@ fn manifest_entry(start: &Path) -> Result<PathBuf> {
             start.display()
         ))
     })?;
-    let text = fs::read_to_string(&manifest_path)
-        .map_err(|error| NiloError::io(&manifest_path, error))?;
-    let manifest: Manifest = toml::from_str(&text).map_err(|error| {
-        NiloError::cli(format!("invalid {}: {error}", manifest_path.display()))
-    })?;
+    let text =
+        fs::read_to_string(&manifest_path).map_err(|error| NiloError::io(&manifest_path, error))?;
+    let manifest: Manifest = toml::from_str(&text)
+        .map_err(|error| NiloError::cli(format!("invalid {}: {error}", manifest_path.display())))?;
     let root = manifest_path.parent().unwrap_or(Path::new("."));
     let entry = root.join(&manifest.package.entry);
     if !entry.is_file() {

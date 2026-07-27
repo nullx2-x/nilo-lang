@@ -103,18 +103,22 @@ impl<W: Write> Interpreter<W> {
             match self.execute(statement, env.clone(), context)? {
                 Flow::Normal => {}
                 Flow::Return(_) => {
-                    return Err(NiloError::runtime("return escaped the current function").at(
-                        &context.filename,
-                        statement.span(),
-                        Some(context.source.as_str()),
-                    ));
+                    return Err(
+                        NiloError::runtime("return escaped the current function").at(
+                            &context.filename,
+                            statement.span(),
+                            Some(context.source.as_str()),
+                        ),
+                    );
                 }
                 Flow::Break | Flow::Continue => {
-                    return Err(NiloError::runtime("loop control escaped the current loop").at(
-                        &context.filename,
-                        statement.span(),
-                        Some(context.source.as_str()),
-                    ));
+                    return Err(
+                        NiloError::runtime("loop control escaped the current loop").at(
+                            &context.filename,
+                            statement.span(),
+                            Some(context.source.as_str()),
+                        ),
+                    );
                 }
             }
             if let Some(name) = statement.exported_name() {
@@ -128,13 +132,14 @@ impl<W: Write> Interpreter<W> {
     }
 
     fn execute(&mut self, statement: &Stmt, env: EnvRef, context: &SourceContext) -> Result<Flow> {
-        self.execute_inner(statement, env, context).map_err(|error| {
-            error.at_if_missing(
-                &context.filename,
-                statement.span(),
-                Some(context.source.as_str()),
-            )
-        })
+        self.execute_inner(statement, env, context)
+            .map_err(|error| {
+                error.at_if_missing(
+                    &context.filename,
+                    statement.span(),
+                    Some(context.source.as_str()),
+                )
+            })
     }
 
     fn execute_inner(
@@ -296,13 +301,7 @@ impl<W: Write> Interpreter<W> {
                 let values = self.iterable_values(&iterable)?;
                 for value in values {
                     let loop_env = Environment::child(&env);
-                    loop_env.define(
-                        name,
-                        Binding {
-                            value,
-                            ty: None,
-                        },
-                    );
+                    loop_env.define(name, Binding { value, ty: None });
                     match self.execute_block(body, loop_env, context)? {
                         Flow::Normal | Flow::Continue => {}
                         Flow::Break => break,
@@ -335,14 +334,20 @@ impl<W: Write> Interpreter<W> {
         Ok(Flow::Normal)
     }
 
-    fn evaluate(&mut self, expression: &Expr, env: EnvRef, context: &SourceContext) -> Result<Value> {
-        self.evaluate_inner(expression, env, context).map_err(|error| {
-            error.at_if_missing(
-                &context.filename,
-                expression.span,
-                Some(context.source.as_str()),
-            )
-        })
+    fn evaluate(
+        &mut self,
+        expression: &Expr,
+        env: EnvRef,
+        context: &SourceContext,
+    ) -> Result<Value> {
+        self.evaluate_inner(expression, env, context)
+            .map_err(|error| {
+                error.at_if_missing(
+                    &context.filename,
+                    expression.span,
+                    Some(context.source.as_str()),
+                )
+            })
     }
 
     fn evaluate_inner(
@@ -556,7 +561,12 @@ impl<W: Write> Interpreter<W> {
     ) -> Result<Value> {
         match callee {
             Value::Native(function) => {
-                self.check_arity(function.name, args.len(), function.min_arity, function.max_arity)?;
+                self.check_arity(
+                    function.name,
+                    args.len(),
+                    function.min_arity,
+                    function.max_arity,
+                )?;
                 self.call_native(function, args, context)
             }
             Value::Function(function) => {
@@ -594,11 +604,7 @@ impl<W: Write> Interpreter<W> {
                     }
                 };
                 if let Some(ty) = &function.return_type {
-                    self.ensure_type(
-                        &value,
-                        ty,
-                        format!("return value of {}", function.name),
-                    )?;
+                    self.ensure_type(&value, ty, format!("return value of {}", function.name))?;
                     self.apply_type_metadata(&value, ty)?;
                 }
                 Ok(value)
@@ -653,14 +659,9 @@ impl<W: Write> Interpreter<W> {
                 .get(&MapKey::String(name.to_owned()))
                 .cloned()
                 .ok_or_else(|| NiloError::runtime(format!("map has no key '{name}'"))),
-            Value::Module(module) => module
-                .exports
-                .borrow()
-                .get(name)
-                .cloned()
-                .ok_or_else(|| {
-                    NiloError::module(format!("module '{}' does not export '{name}'", module.name))
-                }),
+            Value::Module(module) => module.exports.borrow().get(name).cloned().ok_or_else(|| {
+                NiloError::module(format!("module '{}' does not export '{name}'", module.name))
+            }),
             Value::List(list) if name == "length" => Ok(Value::Int(
                 i64::try_from(list.borrow().items.len()).unwrap_or(i64::MAX),
             )),
@@ -689,11 +690,9 @@ impl<W: Write> Interpreter<W> {
             }
             Value::Map(map) => {
                 let key = self.map_key(index)?;
-                map.borrow()
-                    .entries
-                    .get(&key)
-                    .cloned()
-                    .ok_or_else(|| NiloError::runtime(format!("map key {:?} was not found", key.display())))
+                map.borrow().entries.get(&key).cloned().ok_or_else(|| {
+                    NiloError::runtime(format!("map key {:?} was not found", key.display()))
+                })
             }
             other => Err(NiloError::type_error(format!(
                 "{} cannot be indexed",
@@ -769,8 +768,7 @@ impl<W: Write> Interpreter<W> {
                     .map_err(|_| NiloError::runtime("string repeat count is too large"))?;
                 Ok(Value::string(value.repeat(count)))
             }
-            (Value::List(value), Value::Int(count))
-            | (Value::Int(count), Value::List(value)) => {
+            (Value::List(value), Value::Int(count)) | (Value::Int(count), Value::List(value)) => {
                 if count < 0 {
                     return Err(NiloError::runtime("list repeat count cannot be negative"));
                 }
@@ -829,12 +827,7 @@ impl<W: Write> Interpreter<W> {
     fn iterable_values(&self, value: &Value) -> Result<Vec<Value>> {
         match value {
             Value::List(list) => Ok(list.borrow().items.clone()),
-            Value::Map(map) => Ok(map
-                .borrow()
-                .entries
-                .keys()
-                .map(map_key_value)
-                .collect()),
+            Value::Map(map) => Ok(map.borrow().entries.keys().map(map_key_value).collect()),
             Value::String(value) => Ok(value
                 .chars()
                 .map(|character| Value::string(character.to_string()))
@@ -896,9 +889,8 @@ impl<W: Write> Interpreter<W> {
         if let Some(module) = self.standard_modules.get(path) {
             return Ok(module.clone());
         }
-        let exports = stdlib::module_exports(path).ok_or_else(|| {
-            NiloError::module(format!("standard module '{path}' does not exist"))
-        })?;
+        let exports = stdlib::module_exports(path)
+            .ok_or_else(|| NiloError::module(format!("standard module '{path}' does not exist")))?;
         let module = Rc::new(ModuleValue {
             name: module_name(path),
             path: None,
@@ -1074,7 +1066,10 @@ impl<W: Write> Interpreter<W> {
                 }
                 Value::Map(map) if ty.args.len() == 2 => {
                     let map = map.borrow();
-                    if map.key_type.as_ref().is_some_and(|existing| existing != &ty.args[0])
+                    if map
+                        .key_type
+                        .as_ref()
+                        .is_some_and(|existing| existing != &ty.args[0])
                         || map
                             .value_type
                             .as_ref()
@@ -1140,7 +1135,10 @@ impl<W: Write> Interpreter<W> {
                 let value_type = ty.args[1].clone();
                 {
                     let mut map = map.borrow_mut();
-                    if map.key_type.as_ref().is_some_and(|existing| existing != &key_type)
+                    if map
+                        .key_type
+                        .as_ref()
+                        .is_some_and(|existing| existing != &key_type)
                         || map
                             .value_type
                             .as_ref()
@@ -1186,8 +1184,9 @@ impl<W: Write> Interpreter<W> {
                     .map(ToString::to_string)
                     .collect::<Vec<_>>()
                     .join(" ");
-                writeln!(self.output, "{text}")
-                    .map_err(|error| NiloError::runtime(format!("failed to write output: {error}")))?;
+                writeln!(self.output, "{text}").map_err(|error| {
+                    NiloError::runtime(format!("failed to write output: {error}"))
+                })?;
                 Ok(Value::Nil)
             }
             NativeId::Len => self.native_len(&args[0]),
@@ -1228,7 +1227,8 @@ impl<W: Write> Interpreter<W> {
             }
             NativeId::FsReadText => {
                 let path = self.native_path(&args[0], context, "fs.read_text path")?;
-                let text = fs::read_to_string(&path).map_err(|error| NiloError::io(&path, error))?;
+                let text =
+                    fs::read_to_string(&path).map_err(|error| NiloError::io(&path, error))?;
                 Ok(Value::string(text))
             }
             NativeId::FsWriteText => {
@@ -1279,8 +1279,7 @@ impl<W: Write> Interpreter<W> {
                 }
             }
             NativeId::StringTrim => Ok(Value::string(
-                self.expect_string(&args[0], "string.trim argument")?
-                    .trim(),
+                self.expect_string(&args[0], "string.trim argument")?.trim(),
             )),
             NativeId::StringLower => Ok(Value::string(
                 self.expect_string(&args[0], "string.lower argument")?
@@ -1421,7 +1420,11 @@ impl<W: Write> Interpreter<W> {
         }
         let mut values = Vec::new();
         let mut current = start;
-        while if step > 0 { current < end } else { current > end } {
+        while if step > 0 {
+            current < end
+        } else {
+            current > end
+        } {
             if values.len() >= 1_000_000 {
                 return Err(NiloError::runtime(
                     "range would contain more than 1,000,000 values",
@@ -1441,20 +1444,10 @@ impl<W: Write> Interpreter<W> {
                 map.borrow().entries.keys().map(map_key_value).collect(),
             )),
             Value::Record(record) => Ok(Value::list(
-                record
-                    .borrow()
-                    .fields
-                    .keys()
-                    .map(Value::string)
-                    .collect(),
+                record.borrow().fields.keys().map(Value::string).collect(),
             )),
             Value::Module(module) => Ok(Value::list(
-                module
-                    .exports
-                    .borrow()
-                    .keys()
-                    .map(Value::string)
-                    .collect(),
+                module.exports.borrow().keys().map(Value::string).collect(),
             )),
             other => Err(NiloError::type_error(format!(
                 "keys expects map, record, or module; got {}",
@@ -1508,9 +1501,11 @@ impl<W: Write> Interpreter<W> {
                 if let Some(value) = value.as_i64() {
                     Value::Int(value)
                 } else {
-                    Value::Float(value.as_f64().ok_or_else(|| {
-                        NiloError::runtime("JSON number cannot be represented")
-                    })?)
+                    Value::Float(
+                        value.as_f64().ok_or_else(|| {
+                            NiloError::runtime("JSON number cannot be represented")
+                        })?,
+                    )
                 }
             }
             serde_json::Value::String(value) => Value::string(value),
@@ -1659,14 +1654,9 @@ impl<W: Write> Interpreter<W> {
         match value {
             Value::Nil => Ok(0),
             Value::Int(value) => Ok(*value),
-            Value::List(list) => list
-                .borrow()
-                .items
-                .iter()
-                .try_fold(0_i64, |flags, value| {
-                    self.integer(value, "regex flag")
-                        .map(|value| flags | value)
-                }),
+            Value::List(list) => list.borrow().items.iter().try_fold(0_i64, |flags, value| {
+                self.integer(value, "regex flag").map(|value| flags | value)
+            }),
             other => Err(NiloError::type_error(format!(
                 "regex flags must be int or list<int>, got {}",
                 other.type_name()
@@ -1692,12 +1682,7 @@ impl<W: Write> Interpreter<W> {
         })
     }
 
-    fn native_path(
-        &self,
-        value: &Value,
-        context: &SourceContext,
-        label: &str,
-    ) -> Result<PathBuf> {
+    fn native_path(&self, value: &Value, context: &SourceContext, label: &str) -> Result<PathBuf> {
         let path = PathBuf::from(self.expect_string(value, label)?);
         Ok(if path.is_absolute() {
             path
@@ -1792,11 +1777,14 @@ impl<W: Write> Interpreter<W> {
                 headers.insert(MapKey::String(name), Value::string(value));
             }
         }
-        let body = response
-            .into_string()
-            .map_err(|error| NiloError::runtime(format!("failed to read HTTP response: {error}")))?;
+        let body = response.into_string().map_err(|error| {
+            NiloError::runtime(format!("failed to read HTTP response: {error}"))
+        })?;
         let mut result = BTreeMap::new();
-        result.insert(MapKey::String("status".to_owned()), Value::Int(i64::from(status)));
+        result.insert(
+            MapKey::String("status".to_owned()),
+            Value::Int(i64::from(status)),
+        );
         result.insert(MapKey::String("headers".to_owned()), Value::map(headers));
         result.insert(MapKey::String("body".to_owned()), Value::string(body));
         Ok(Value::map(result))
@@ -1963,36 +1951,31 @@ mod tests {
 
     #[test]
     fn executes_functions_records_and_typed_lists() {
-        let output = run(
-            r#"
+        let output = run(r#"
             type Point { x: int; y: int; }
             func sum(point: Point) -> int { return point.x + point.y; }
             let values: list<int> = [1, 2];
             push(values, 3);
             let point: Point = Point(values[0], values[2]);
             print(sum(point));
-            "#,
-        )
+            "#)
         .expect("program should run");
         assert_eq!(output, "4\n");
     }
 
     #[test]
     fn rejects_typed_list_mutation() {
-        let error = run(
-            r#"
+        let error = run(r#"
             let values: list<int> = [1];
             push(values, "bad");
-            "#,
-        )
+            "#)
         .expect_err("type mismatch should fail");
         assert!(error.render().contains("expected int"));
     }
 
     #[test]
     fn supports_break_and_continue() {
-        let output = run(
-            r#"
+        let output = run(r#"
             let total: int = 0;
             for value in range(0, 10) {
                 if (value == 2) { continue; }
@@ -2000,8 +1983,7 @@ mod tests {
                 total = total + value;
             }
             print(total);
-            "#,
-        )
+            "#)
         .expect("program should run");
         assert_eq!(output, "8\n");
     }

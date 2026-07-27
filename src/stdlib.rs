@@ -9,14 +9,26 @@ pub fn install_globals(env: &EnvRef) {
             "print",
             native(NativeFunction::variadic("print", NativeId::Print, 0)),
         ),
-        ("len", native(NativeFunction::exact("len", NativeId::Len, 1))),
+        (
+            "len",
+            native(NativeFunction::exact("len", NativeId::Len, 1)),
+        ),
         (
             "push",
             native(NativeFunction::exact("push", NativeId::Push, 2)),
         ),
-        ("pop", native(NativeFunction::exact("pop", NativeId::Pop, 1))),
-        ("str", native(NativeFunction::exact("str", NativeId::Str, 1))),
-        ("int", native(NativeFunction::exact("int", NativeId::Int, 1))),
+        (
+            "pop",
+            native(NativeFunction::exact("pop", NativeId::Pop, 1)),
+        ),
+        (
+            "str",
+            native(NativeFunction::exact("str", NativeId::Str, 1)),
+        ),
+        (
+            "int",
+            native(NativeFunction::exact("int", NativeId::Int, 1)),
+        ),
         (
             "float",
             native(NativeFunction::exact("float", NativeId::Float, 1)),

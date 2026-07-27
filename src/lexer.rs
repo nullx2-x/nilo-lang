@@ -101,11 +101,18 @@ impl<'a> Lexer<'a> {
             ';' => TokenKind::Semicolon,
             '?' => TokenKind::Question,
             _ => {
-                return Err(NiloError::lex(format!("unexpected character {first:?}")).at(
-                    &self.filename,
-                    Span::new(line, column, self.byte_offsets[start_index], first.len_utf8()),
-                    Some(self.source),
-                ));
+                return Err(
+                    NiloError::lex(format!("unexpected character {first:?}")).at(
+                        &self.filename,
+                        Span::new(
+                            line,
+                            column,
+                            self.byte_offsets[start_index],
+                            first.len_utf8(),
+                        ),
+                        Some(self.source),
+                    ),
+                );
             }
         };
         Ok(self.make_token(kind, start_index, line, column, None))
@@ -372,12 +379,9 @@ mod tests {
 
     #[test]
     fn tokenizes_unicode_comments_and_numbers() {
-        let tokens = Lexer::new(
-            "let 日本語 = 12.5e2; /* nested /* ok */ done */",
-            "<test>",
-        )
-        .tokenize()
-        .expect("source should tokenize");
+        let tokens = Lexer::new("let 日本語 = 12.5e2; /* nested /* ok */ done */", "<test>")
+            .tokenize()
+            .expect("source should tokenize");
         assert_eq!(tokens[0].kind, TokenKind::Let);
         assert_eq!(tokens[1].lexeme, "日本語");
         assert!(matches!(

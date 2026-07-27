@@ -147,7 +147,9 @@ impl<'a> Parser<'a> {
         if !self.check(TokenKind::RightParen) {
             loop {
                 if params.len() >= 255 {
-                    return Err(self.error(self.current(), "functions may have at most 255 parameters"));
+                    return Err(
+                        self.error(self.current(), "functions may have at most 255 parameters")
+                    );
                 }
                 let parameter = self.consume(TokenKind::Identifier, "expected a parameter name")?;
                 if !seen.insert(parameter.lexeme.clone()) {
@@ -529,10 +531,9 @@ impl<'a> Parser<'a> {
                 if !self.check(TokenKind::RightParen) {
                     loop {
                         if args.len() >= 255 {
-                            return Err(self.error(
-                                self.current(),
-                                "calls may have at most 255 arguments",
-                            ));
+                            return Err(
+                                self.error(self.current(), "calls may have at most 255 arguments")
+                            );
                         }
                         args.push(self.expression()?);
                         if !self.matches(TokenKind::Comma) {
@@ -553,7 +554,8 @@ impl<'a> Parser<'a> {
                     span,
                 );
             } else if self.matches(TokenKind::Dot) {
-                let name = self.consume(TokenKind::Identifier, "expected a property name after '.'")?;
+                let name =
+                    self.consume(TokenKind::Identifier, "expected a property name after '.'")?;
                 let span = expression.span.merge(name.span);
                 expression = Expr::new(
                     ExprKind::Get {
@@ -681,10 +683,7 @@ impl<'a> Parser<'a> {
             }
         }
         let end = self.consume(TokenKind::RightBracket, "expected ']' after list")?;
-        Ok(Expr::new(
-            ExprKind::List { values },
-            start.merge(end.span),
-        ))
+        Ok(Expr::new(ExprKind::List { values }, start.merge(end.span)))
     }
 
     fn map_literal(&mut self, start: Span) -> Result<Expr> {
@@ -704,10 +703,7 @@ impl<'a> Parser<'a> {
             }
         }
         let end = self.consume(TokenKind::RightBrace, "expected '}' after map")?;
-        Ok(Expr::new(
-            ExprKind::Map { entries },
-            start.merge(end.span),
-        ))
+        Ok(Expr::new(ExprKind::Map { entries }, start.merge(end.span)))
     }
 
     fn type_ref(&mut self) -> Result<TypeRef> {
