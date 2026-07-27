@@ -1,14 +1,11 @@
 import "std/regex" as regex;
 
-let email = regex.find("(?P<user>[\\w.]+)@(?P<host>[\\w.]+)", "dev@example.com");
+let email = regex.captures(
+    "(?P<user>[\\w.]+)@(?P<host>[\\w.]+)",
+    "dev@example.com"
+);
+
 print(email.named.user);
 print(email.named.host);
-
-let words = regex.find_all("\\w+", "Nilo speaks many languages");
-print(len(words));
-
-let slug = regex.replace("\\s+", "Nilo Language", "-");
-print(slug);
-
-let pattern = regex.compile("^nilo$", regex.flags.ignore_case);
-print(pattern("NILO"));
+print(regex.find_all("\\w+", "Nilo speaks many languages"));
+print(regex.replace("\\s+", "Nilo Language", "-"));

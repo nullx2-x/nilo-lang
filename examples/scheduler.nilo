@@ -6,229 +6,108 @@ type Task {
     estimate: int;
     impact: int;
     risk: int;
-    deps: list;
+    deps: list<str>;
 }
 
-func task(id: str, title: str, estimate: int, impact: int, risk: int, deps: list) -> Task {
+func task(id: str, title: str, estimate: int, impact: int, risk: int, deps: list<str>) -> Task {
     return Task(id, title, estimate, impact, risk, deps);
 }
 
-func contains(xs: list, x: str) -> bool {
-    let found = false;
-
-    for item in xs {
-        if (item == x) {
-            found = true;
+func contains(xs: list<any>, target: any) -> bool {
+    for value in xs {
+        if (value == target) {
+            return true;
         }
     }
-
-    return found;
+    return false;
 }
 
-func find_task(tasks: list, id: str) -> Task {
-    let found = nil;
-
-    for t in tasks {
-        if (t.id == id) {
-            found = t;
+func find_task(tasks: list<Task>, id: str) -> Task? {
+    for value in tasks {
+        if (value.id == id) {
+            return value;
         }
     }
-
-    return found;
+    return nil;
 }
 
-func dependency_warnings(tasks: list) -> list {
-    let warnings = [];
-
-    for t in tasks {
-        for dep in t.deps {
-            if (find_task(tasks, dep) == nil) {
-                push(warnings, "missing dependency: " + t.id + " -> " + dep);
-            }
+func deps_done(item: Task, done: list<str>) -> bool {
+    for dependency in item.deps {
+        if (!contains(done, dependency)) {
+            return false;
         }
     }
-
-    return warnings;
+    return true;
 }
 
-func reaches(tasks: list, current: str, target: str, seen: list) -> bool {
-    if (current == target) {
-        return true;
-    }
-
-    if (contains(seen, current)) {
-        return false;
-    }
-
-    push(seen, current);
-
-    let cur = find_task(tasks, current);
-
-    if (cur == nil) {
-        return false;
-    }
-
-    let hit = false;
-
-    for dep in cur.deps {
-        if (reaches(tasks, dep, target, seen)) {
-            hit = true;
-        }
-    }
-
-    return hit;
-}
-
-func has_cycle(tasks: list) -> bool {
-    let found = false;
-
-    for t in tasks {
-        for dep in t.deps {
-            if (reaches(tasks, dep, t.id, [])) {
-                found = true;
-            }
-        }
-    }
-
-    return found;
-}
-
-func deps_done(t: Task, done: list) -> bool {
-    let ok = true;
-
-    for dep in t.deps {
-        if (!contains(done, dep)) {
-            ok = false;
-        }
-    }
-
-    return ok;
-}
-
-func downstream_impact(tasks: list, id: str, seen: list) -> int {
+func downstream_impact(tasks: list<Task>, id: str, seen: list<str>) -> int {
     if (contains(seen, id)) {
         return 0;
     }
-
     push(seen, id);
-
-    let total = 0;
-
-    for t in tasks {
-        if (contains(t.deps, id)) {
-            total = total + t.impact;
-            total = total + downstream_impact(tasks, t.id, seen);
+    let total: int = 0;
+    for item in tasks {
+        if (contains(item.deps, id)) {
+            total = total + item.impact;
+            total = total + downstream_impact(tasks, item.id, seen);
         }
     }
-
     return total;
 }
 
-func score(tasks: list, t: Task) -> int {
-    let unlock = downstream_impact(tasks, t.id, []);
-    return t.impact * 10 + unlock * 2 - t.risk * 3 - t.estimate;
+func score(tasks: list<Task>, item: Task) -> int {
+    return item.impact * 10
+        + downstream_impact(tasks, item.id, []) * 2
+        - item.risk * 3
+        - item.estimate;
 }
 
-func select_next(tasks: list, done: list) -> Task {
-    let best = nil;
-    let best_score = -999999;
-
-    for t in tasks {
-        if (!contains(done, t.id)) {
-            if (deps_done(t, done)) {
-                let s = score(tasks, t);
-
-                if (best == nil || s > best_score) {
-                    best = t;
-                    best_score = s;
-                }
+func select_next(tasks: list<Task>, done: list<str>) -> Task? {
+    let best: Task? = nil;
+    let best_score: int = -999999;
+    for item in tasks {
+        if (!contains(done, item.id) && deps_done(item, done)) {
+            let current_score: int = score(tasks, item);
+            if (best == nil || current_score > best_score) {
+                best = item;
+                best_score = current_score;
             }
         }
     }
-
     return best;
 }
 
-func make_plan(tasks: list) -> map {
-    let warnings = dependency_warnings(tasks);
-    let cycle = has_cycle(tasks);
-
-    let done = [];
-    let plan = [];
-    let stuck = false;
-
-    if (!cycle && len(warnings) == 0) {
-        while (len(done) < len(tasks) && !stuck) {
-            let next = select_next(tasks, done);
-
-            if (next == nil) {
-                stuck = true;
-            } else {
-                push(plan, next);
-                push(done, next.id);
-            }
+func make_plan(tasks: list<Task>) -> list<Task> {
+    let done: list<str> = [];
+    let plan: list<Task> = [];
+    while (len(done) < len(tasks)) {
+        let next: Task? = select_next(tasks, done);
+        if (next == nil) {
+            break;
         }
-    } else {
-        stuck = true;
+        push(plan, next);
+        push(done, next.id);
     }
-
-    return {
-        "complete": len(done) == len(tasks),
-        "cycle": cycle,
-        "stuck": stuck,
-        "warnings": warnings,
-        "plan": plan
-    };
+    return plan;
 }
 
-func print_plan(tasks: list, result: map) {
-    print("=== Nilo Task Scheduler ===");
-
-    if (result.cycle) {
-        print("cycle detected");
-    }
-
-    for warning in result.warnings {
-        print(warning);
-    }
-
-    let i = 0;
-
-    while (i < len(result.plan)) {
-        let t = result.plan[i];
-        let s = score(tasks, t);
-
-        print(
-            str(i + 1)
-            + ". "
-            + t.id
-            + " | "
-            + t.title
-            + " | score="
-            + str(s)
-            + " | estimate="
-            + str(t.estimate)
-        );
-
-        i = i + 1;
-    }
-
-    print("complete=" + str(result.complete));
-}
-
-let tasks = [
+let tasks: list<Task> = [
     task("design", "言語仕様を固める", 3, 10, 2, []),
     task("lexer", "字句解析を安定化する", 2, 8, 2, ["design"]),
     task("parser", "構文木を拡張する", 4, 9, 3, ["lexer"]),
-    task("runtime", "実行系の組み込み関数を整理する", 5, 9, 4, ["parser"]),
-    task("module", "import/exportを強化する", 3, 8, 3, ["parser"]),
-    task("test", "回帰テストを増やす", 2, 7, 1, ["runtime", "module"]),
-    task("docs", "日本語ドキュメントを整える", 2, 6, 1, ["test"]),
-    task("ci", "CIでnilo testを回す", 2, 7, 2, ["test"]),
-    task("release", "v0.1.0を公開する", 1, 9, 3, ["docs", "ci"])
+    task("runtime", "Rust実行系を完成する", 5, 10, 3, ["parser"]),
+    task("module", "import/exportを強化する", 3, 8, 2, ["parser"]),
+    task("test", "回帰テストを増やす", 2, 8, 1, ["runtime", "module"]),
+    task("docs", "日本語ドキュメントを整える", 2, 7, 1, ["test"]),
+    task("release", "単体バイナリを公開する", 1, 10, 2, ["docs"])
 ];
 
-let result = make_plan(tasks);
-
-print_plan(tasks, result);
-print(json.stringify(result));
+let plan: list<Task> = make_plan(tasks);
+let index: int = 0;
+print("=== Nilo Task Scheduler ===");
+while (index < len(plan)) {
+    let item: Task = plan[index];
+    print(str(index + 1) + ".", item.id, "score=" + str(score(tasks, item)));
+    index = index + 1;
+}
+print(json.stringify({"complete": len(plan) == len(tasks), "plan": plan}, true));

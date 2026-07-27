@@ -1,159 +1,142 @@
 # Nilo
 
-Nilo is a small programming language project focused on readable syntax, simple modules, and an implementation that is easy to grow.
+Nilo is a small, readable programming language implemented in Rust. It ships as a single `nilo` command with an interpreter, persistent REPL, module system, runtime-checked type annotations, project manifests, tests, and developer inspection tools.
 
-The current implementation is an alpha interpreter written in Python with no runtime dependencies.
+> **Status:** Nilo 0.2 is an alpha language. The syntax and standard library are usable for experiments and small tools, but compatibility may change before 1.0.
 
-Japanese documentation is available in [README.ja.md](README.ja.md).
+Japanese documentation: [README.ja.md](README.ja.md)
+
+## Install
+
+A local Rust toolchain is required while prebuilt releases are being established:
+
+```bash
+cargo install --git https://github.com/nullx2-x/nilo-lang
+nilo --version
+```
+
+To build this checkout:
+
+```bash
+cargo build --release
+./target/release/nilo examples/main.nilo
+```
+
+## Quick start
+
+```bash
+# Run a file directly.
+nilo examples/main.nilo
+
+# Run the entry declared in Nilo.toml.
+nilo run
+
+# Evaluate one expression or statement.
+nilo -e 'print("Hello from Nilo")'
+
+# Start the persistent REPL.
+nilo
+
+# Validate and test a project.
+nilo check examples/main.nilo
+nilo test
+
+# Create a new project.
+nilo init my-app
+cd my-app
+nilo run
+```
+
+## Language example
+
+```nilo
+from "math_tools" import add;
+import "std/json" as json;
+
+type Point {
+    x: int;
+    y: int;
+}
+
+func magnitude_squared(point: Point) -> int {
+    return point.x * point.x + point.y * point.y;
+}
+
+let point: Point = Point(3, 4);
+let values: list<int> = [1, 2, 3];
+push(values, add(point.x, point.y));
+
+print(json.stringify({
+    "point": point,
+    "score": magnitude_squared(point),
+    "values": values
+}, true));
+```
 
 ## Features
 
-- Variables with `let`
-- Functions and `return`
-- Arithmetic, comparisons, booleans, strings, lists, and indexing
-- Maps, property access, `if` / `else`, `while`, and `for ... in`
-- Lightweight record-style `type` declarations
-- File modules with `export`, `import`, and `from ... import ...`
-- Standard modules such as `std/json`, `std/regex`, `std/fs`, `std/http`, `std/time`
-- CLI runner, REPL, project init, test runner, token dump, and AST dump
+- `let`, functions, recursion, records, and closures
+- integers, floats, booleans, strings, lists, maps, and `nil`
+- `if` / `else if` / `else`, `while`, `for ... in`, `break`, and `continue`
+- runtime-checked type annotations such as `int`, `User?`, `list<str>`, and `map<str, any>`
+- mutable variables, record fields, list indexes, and map indexes
+- file modules using `export`, `import`, and `from ... import ...`
+- standard modules: `std/json`, `std/regex`, `std/fs`, `std/http`, `std/time`, `std/list`, `std/string`, and `std/math`
+- source-aware diagnostics with line and column excerpts
+- CLI runner, persistent REPL, project initializer, test runner, token dump, and AST dump
 
-## Quick Start
+## Command line
+
+```text
+nilo                         Start the interactive REPL
+nilo <file.nilo>             Run a source file
+nilo run [file.nilo]         Run a source file or Nilo.toml entry
+nilo eval <source>           Evaluate source text
+nilo -e <source>             Evaluate source text
+nilo check <file.nilo>       Validate syntax without executing
+nilo test [path]             Run every *_test.nilo file
+nilo init [path] [--name N]  Create a new Nilo project
+nilo tokens <file.nilo>      Print lexer tokens as JSON
+nilo ast <file.nilo>         Print the AST as JSON
+```
+
+## Project layout
+
+A Nilo package is a regular directory with `Nilo.toml`:
+
+```toml
+[package]
+name = "my-app"
+version = "0.1.0"
+entry = "src/main.nilo"
+
+[exports]
+main = "src/main.nilo"
+```
+
+```text
+my-app/
+├── Nilo.toml
+├── src/
+│   └── main.nilo
+└── tests/
+    └── main_test.nilo
+```
+
+See [docs/LANGUAGE.md](docs/LANGUAGE.md) for the language guide and [docs/PACKAGES.md](docs/PACKAGES.md) for package conventions.
+
+## Development
 
 ```bash
-python3 -m nilo examples/main.nilo
+cargo fmt --all -- --check
+cargo clippy --all-targets --all-features -- -D warnings
+cargo test --all-targets
+cargo run -- examples/main.nilo
+cargo run -- test tests
 ```
 
-Or after installing locally:
+The implementation is intentionally split into lexer, parser, AST, values, environment, interpreter, standard library, and CLI modules so the language can grow toward bytecode or native compilation without replacing its front end.
 
-```bash
-python3 -m pip install -e .
-nilo examples/main.nilo
-```
+## License
 
-The explicit command form is:
-
-```bash
-python3 -m nilo run examples/main.nilo
-python3 -m nilo test
-python3 -m nilo init my-app
-python3 -m nilo tokens examples/main.nilo
-python3 -m nilo ast examples/main.nilo
-```
-
-## Example
-
-```nilo
-from "math_tools" import add, sum_to;
-import "messages" as messages;
-import "std/json" as json;
-import "std/regex" as regex;
-
-let total = add(10, 20);
-let payload = {"name": "nilo", "total": total};
-print(messages.banner);
-print(total);
-print(sum_to(5));
-print(json.stringify(payload));
-print(regex.is_match("^[a-z]+$", "nilo"));
-```
-
-## Regular Expressions
-
-`std/regex` provides a practical regular expression API backed by Python's regex engine:
-
-```nilo
-import "std/regex" as regex;
-
-let email = regex.find("(?P<user>[\\w.]+)@(?P<host>[\\w.]+)", "dev@example.com");
-print(email.named.user);
-
-let words = regex.find_all("\\w+", "Nilo speaks many languages");
-print(len(words));
-
-let slug = regex.replace("\\s+", "Nilo Language", "-");
-print(slug);
-```
-
-Available functions:
-
-- `compile(pattern, flags?)`
-- `is_match(pattern, text, flags?)`
-- `find(pattern, text, flags?)`
-- `find_all(pattern, text, flags?)`
-- `captures(pattern, text, flags?)`
-- `replace(pattern, text, replacement, flags?)`
-- `split(pattern, text, flags?)`
-- `escape(text)`
-
-Flags are available under `regex.flags`, such as `ignore_case`, `multiline`, `dot_all`, `verbose`, and `ascii`.
-
-`examples/math_tools.nilo`:
-
-```nilo
-export func add(a: int, b: int) -> int {
-    return a + b;
-}
-
-export func sum_to(n: int) -> int {
-    let i = 0;
-    let total = 0;
-    while (i <= n) {
-        total = total + i;
-        i = i + 1;
-    }
-    return total;
-}
-```
-
-## Module System
-
-Use `export` to expose values from a file:
-
-```nilo
-export let answer = 42;
-export func double(x: int) -> int {
-    return x * 2;
-}
-```
-
-Import an entire module:
-
-```nilo
-import "tools" as tools;
-print(tools.answer);
-```
-
-Or import specific names:
-
-```nilo
-from "tools" import answer, double;
-print(double(answer));
-```
-
-Relative imports are resolved from the importing file. The `.nilo` extension is optional.
-
-## Packaging
-
-This repository can be distributed as a Python package during the alpha phase:
-
-```bash
-python3 -m build
-```
-
-The installed command is:
-
-```bash
-nilo path/to/program.nilo
-```
-
-Longer term, the interpreter can be ported to Rust once the syntax and runtime behavior settle. The current structure keeps lexer, parser, AST, interpreter, and CLI separated so that migration is straightforward.
-
-## Project Status
-
-Nilo is not production-ready yet. Good next milestones are:
-
-- Static type checking
-- Better diagnostics with source snippets
-- Standard library modules
-- Package registry format
-- Rust bytecode VM or native compiler backend
+MIT

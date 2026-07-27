@@ -1,40 +1,22 @@
-from "../examples/math_tools" import add, sum_to;
+from "../examples/math_tools" import add, sum_to, fibonacci;
 import "std/json" as json;
 import "std/regex" as regex;
 
-let values = [1, 2, 3];
-let total = 0;
+assert(add(6, 4) == 10, "module function call failed");
+assert(sum_to(5) == 15, "while loop failed");
+assert(fibonacci(10) == 55, "recursion failed");
 
-for value in values {
-    total = total + value;
-}
+let values: list<int> = [1, 2, 3];
+values[1] = 20;
+push(values, 4);
+assert(values == [1, 20, 3, 4], "list mutation failed");
+assert(values[-1] == 4, "negative indexing failed");
 
-if (add(total, 4) != 10) {
-    print("add failed");
-}
-
-if (sum_to(5) != 15) {
-    print("sum_to failed");
-}
-
-let data = json.parse("{\"name\":\"nilo\"}");
-print(data.name);
-
-if (!regex.is_match("^[a-z]+$", "nilo")) {
-    print("regex is_match failed");
-}
+let data: map<str, any> = json.parse("{\"name\":\"nilo\",\"stable\":true}");
+assert(data.name == "nilo", "JSON parsing failed");
+assert(data.stable, "boolean property access failed");
 
 let email = regex.captures("(?P<user>[\\w.]+)@(?P<host>[\\w.]+)", "dev@example.com");
-if (email.named.user != "dev") {
-    print("regex named capture failed");
-}
-
-let words = regex.find_all("\\w+", "Nilo speaks many languages");
-if (len(words) != 4) {
-    print("regex find_all failed");
-}
-
-let normalized = regex.replace("\\s+", "Nilo Language", "-");
-if (normalized != "Nilo-Language") {
-    print("regex replace failed");
-}
+assert(email.named.user == "dev", "named regex capture failed");
+assert(len(regex.find_all("\\w+", "Nilo speaks many languages")) == 4, "regex find_all failed");
+assert(regex.replace("\\s+", "Nilo Language", "-") == "Nilo-Language", "regex replace failed");
