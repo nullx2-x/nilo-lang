@@ -10,7 +10,7 @@ permissions:
   pull-requests: write
 
 concurrency:
-  group: rust-rewrite-fix-validation
+  group: rust-rewrite-lock-validation
   cancel-in-progress: false
 
 jobs:
@@ -28,20 +28,24 @@ jobs:
         with:
           components: rustfmt, clippy
 
+      - name: Install declared minimum Rust
+        run: rustup toolchain install 1.78.0 --profile minimal
+
       - name: Cache Cargo data
         uses: Swatinem/rust-cache@v2
 
-      - name: Apply fixes and format Rust source
+      - name: Apply fixes, lock dependencies, and format
         shell: bash
         run: |
           set -euo pipefail
           python3 .ci/apply_fixes.py
+          cargo generate-lockfile
           cargo fmt --all
           if ! git diff --quiet; then
             git config user.name 'github-actions[bot]'
             git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
             git add -A
-            git commit -m 'fix: resolve Rust compiler errors'
+            git commit -m 'build: lock validated Rust dependencies'
             git push origin HEAD:agent/rust-rewrite-fix
           fi
 
@@ -52,18 +56,19 @@ jobs:
         run: |
           set -o pipefail
           {
-            cargo clippy --all-targets --all-features -- -D warnings &&
-            cargo test --all-targets &&
-            cargo run --quiet -- check examples/main.nilo &&
-            cargo run --quiet -- examples/main.nilo &&
-            cargo run --quiet -- test tests
+            cargo clippy --locked --all-targets --all-features -- -D warnings &&
+            cargo test --locked --all-targets &&
+            cargo run --locked --quiet -- check examples/main.nilo &&
+            cargo run --locked --quiet -- examples/main.nilo &&
+            cargo run --locked --quiet -- test tests &&
+            cargo +1.78.0 check --locked
           } 2>&1 | tee validation.log
 
       - name: Upload validation log
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: nilo-rust-validation-fix
+          name: nilo-rust-validation-locked
           path: validation.log
           if-no-files-found: warn
 
