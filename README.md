@@ -177,3 +177,5 @@ The official wordmark, square icon, mascot artwork, palette, and generation prom
 ## License
 
 MIT
+
+<p align="center"><sub>© 2026 Taeko Nomaguchi. All Rights Reserved.</sub></p>
