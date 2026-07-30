@@ -1,6 +1,18 @@
-# Nilo
+<div align="center">
+  <img src="docs/assets/nilo-icon.svg" alt="Niloアイコン" width="104" />
+  <br />
+  <img src="docs/assets/nilo-logo.svg" alt="Nilo" width="430" />
+  <p><strong>シンプルに書く。自由に創る。</strong></p>
+  <p>Rustで実装された、小さく読みやすいプログラミング言語です。</p>
+  <p>
+    <a href="README.md">English</a> ·
+    <a href="docs/LANGUAGE.md">言語ガイド</a> ·
+    <a href="docs/PACKAGES.md">パッケージ</a> ·
+    <a href="docs/BRAND.md">ブランドキット</a>
+  </p>
+</div>
 
-Niloは、Rustで実装された小さく読みやすいプログラミング言語です。単一の`nilo`コマンドに、インタプリタ、状態を保持するREPL、モジュール、実行時型検証、プロジェクトマニフェスト、テストランナー、開発者向け解析機能をまとめています。
+Niloは、単一の`nilo`コマンドに、インタプリタ、状態を保持するREPL、モジュール、実行時型検証、プロジェクトマニフェスト、テストランナー、開発者向け解析機能をまとめています。
 
 > **現在の状態:** Nilo 0.2はアルファ版です。実験や小さなツールには利用できますが、1.0までは構文や標準ライブラリが変更される可能性があります。
 
@@ -83,6 +95,23 @@ print(json.stringify({
 - 行・列とソース抜粋を表示するエラー診断
 - CLI、永続REPL、プロジェクト初期化、テスト、トークン表示、AST表示
 
+## マスコット「ニロ」
+
+<table>
+  <tr>
+    <td width="62%" valign="middle">
+      <h3>Niro（ニロ）— Nilo公式マスコット</h3>
+      <p>ニロは、コードの中を探検し、アイデアやバグを見つけるのが得意な、好奇心旺盛の黒猫です。額の発光する<strong>N</strong>、エメラルドグリーンの瞳・肉球・尻尾の先が、Niloのブランドを表しています。</p>
+      <p>ドキュメント、チュートリアル、コミュニティ向け画像、リリース告知などに登場し、Niloを親しみやすく案内します。</p>
+      <p><a href="docs/prompts/niro-mascot.md">マスコット生成プロンプト</a> · <a href="docs/BRAND.md">ブランドガイド</a></p>
+      <blockquote><strong>シンプルに書く。自由に創る。</strong></blockquote>
+    </td>
+    <td width="38%" align="center" valign="middle">
+      <img src="docs/assets/niro-mascot.svg" alt="Niloの黒猫マスコット、ニロ" width="300" />
+    </td>
+  </tr>
+</table>
+
 ## コマンド
 
 ```text
@@ -112,6 +141,15 @@ entry = "src/main.nilo"
 main = "src/main.nilo"
 ```
 
+```text
+my-app/
+├── Nilo.toml
+├── src/
+│   └── main.nilo
+└── tests/
+    └── main_test.nilo
+```
+
 詳細は[言語ガイド](docs/LANGUAGE.md)と[パッケージガイド](docs/PACKAGES.md)を参照してください。
 
 ## 開発
@@ -125,6 +163,16 @@ cargo run -- test tests
 ```
 
 実装は字句解析、構文解析、AST、値、環境、インタプリタ、標準ライブラリ、CLIに分離しています。将来、フロントエンドを維持したままバイトコードVMやネイティブコンパイラへ発展させられる構造です。
+
+## ブランド素材
+
+公式ロゴ、正方形アイコン、マスコット、配色、生成プロンプトをリポジトリ内で管理しています。
+
+- [Niloロゴ](docs/assets/nilo-logo.svg)
+- [Niloアイコン](docs/assets/nilo-icon.svg)
+- [ニロのマスコット画像](docs/assets/niro-mascot.svg)
+- [ブランドガイド](docs/BRAND.md)
+- [ニロ生成プロンプト](docs/prompts/niro-mascot.md)
 
 ## ライセンス
 
