@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="600" viewBox="0 0 640 600" role="img" aria-labelledby="title desc">
+  <title id="title">Niro, the Nilo language mascot</title>
+  <desc id="desc">A cheerful black cat with emerald eyes, paws, tail tip, and a glowing N mark on the forehead.</desc>
+  <defs>
+    <linearGradient id="fur" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#18242b"/>
+      <stop offset="0.55" stop-color="#0b1217"/>
+      <stop offset="1" stop-color="#03070a"/>
+    </linearGradient>
+    <linearGradient id="emerald" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#74ffe9"/>
+      <stop offset="0.45" stop-color="#00e5c0"/>
+      <stop offset="1" stop-color="#00a891"/>
+    </linearGradient>
+    <radialGradient id="eye" cx="42%" cy="35%" r="70%">
+      <stop stop-color="#d9fffb"/>
+      <stop offset="0.28" stop-color="#70f7e4"/>
+      <stop offset="0.68" stop-color="#00bfa6"/>
+      <stop offset="1" stop-color="#036f69"/>
+    </radialGradient>
+  </defs>
+  <ellipse cx="321" cy="548" rx="205" ry="26" fill="#001c18" opacity="0.34"/>
+  <g>
+    <path d="M458 430 C565 417 585 492 543 525 C516 546 486 525 508 502 C531 478 517 456 474 468" fill="none" stroke="url(#fur)" stroke-width="57" stroke-linecap="round"/>
+    <path d="M526 516 C549 503 555 477 541 459" fill="none" stroke="url(#emerald)" stroke-width="24" stroke-linecap="round"/>
+    <ellipse cx="322" cy="411" rx="166" ry="145" fill="url(#fur)" stroke="#1f4c4a" stroke-width="7"/>
+    <path d="M246 392 C276 422 367 425 399 391 C405 456 382 505 322 514 C261 505 239 456 246 392Z" fill="#101b20" opacity="0.85"/>
+    <path d="M270 472 C292 491 352 491 376 472" fill="none" stroke="#293c42" stroke-width="8" stroke-linecap="round"/>
+    <path d="M181 207 L173 67 L278 129 C305 119 340 119 368 129 L471 66 L463 208 C484 238 492 274 484 315 C470 389 407 430 322 431 C237 430 173 389 159 315 C151 274 160 238 181 207Z" fill="url(#fur)" stroke="#245c58" stroke-width="8" stroke-linejoin="round"/>
+    <path d="M197 113 L207 178 L260 137Z" fill="#0ae0c0" opacity="0.78"/>
+    <path d="M445 112 L434 178 L382 137Z" fill="#0ae0c0" opacity="0.78"/>
+    <path d="M207 126 L215 157 L239 139Z" fill="#75ffe9" opacity="0.48"/>
+    <path d="M435 126 L428 157 L404 139Z" fill="#75ffe9" opacity="0.48"/>
+    <path d="M167 302 L123 328 L169 338 L137 375 L196 367" fill="url(#fur)" stroke="#245c58" stroke-width="6" stroke-linejoin="round"/>
+    <path d="M477 302 L521 328 L475 338 L507 375 L448 367" fill="url(#fur)" stroke="#245c58" stroke-width="6" stroke-linejoin="round"/>
+    <ellipse cx="251" cy="273" rx="56" ry="69" fill="#02080b" stroke="#82fff0" stroke-width="6"/>
+    <ellipse cx="393" cy="273" rx="56" ry="69" fill="#02080b" stroke="#82fff0" stroke-width="6"/>
+    <ellipse cx="253" cy="281" rx="38" ry="51" fill="url(#eye)"/>
+    <ellipse cx="391" cy="281" rx="38" ry="51" fill="url(#eye)"/>
+    <ellipse cx="254" cy="291" rx="13" ry="30" fill="#031115"/>
+    <ellipse cx="390" cy="291" rx="13" ry="30" fill="#031115"/>
+    <circle cx="237" cy="255" r="13" fill="#fff"/>
+    <circle cx="374" cy="255" r="13" fill="#fff"/>
+    <circle cx="268" cy="315" r="6" fill="#b7fff5"/>
+    <circle cx="404" cy="315" r="6" fill="#b7fff5"/>
+    <path d="M307 336 Q322 346 337 336 Q335 355 322 359 Q309 355 307 336Z" fill="#ff9bb1" stroke="#561e2c" stroke-width="4"/>
+    <path d="M322 360 C310 360 302 368 299 378 M322 360 C334 360 342 368 345 378" fill="none" stroke="#91c5bf" stroke-width="5" stroke-linecap="round"/>
+    <path d="M292 381 Q322 406 352 381" fill="#431925" stroke="#8b5060" stroke-width="4"/>
+    <path d="M309 392 Q322 403 335 392" fill="#ff8fa9"/>
+    <path d="M194 337 H118 M199 354 L129 372 M450 337 H526 M445 354 L515 372" stroke="#7ecfc6" stroke-width="4" stroke-linecap="round" opacity="0.72"/>
+    <g fill="none" stroke="url(#emerald)" stroke-width="13" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M285 192 V148 L359 194 V148"/>
+      <path d="M285 148 L359 194" opacity="0.48"/>
+    </g>
+    <circle cx="274" cy="207" r="5" fill="#6effe8"/>
+    <circle cx="369" cy="209" r="5" fill="#6effe8"/>
+    <g transform="translate(115 342) rotate(-13 78 78)">
+      <ellipse cx="78" cy="78" rx="65" ry="73" fill="url(#fur)" stroke="#245c58" stroke-width="7"/>
+      <ellipse cx="78" cy="88" rx="27" ry="31" fill="url(#emerald)"/>
+      <circle cx="48" cy="57" r="13" fill="#12d8bd"/>
+      <circle cx="71" cy="44" r="13" fill="#30efd2"/>
+      <circle cx="96" cy="44" r="13" fill="#30efd2"/>
+      <circle cx="119" cy="58" r="13" fill="#12d8bd"/>
+    </g>
+    <g transform="translate(370 342) rotate(13 78 78)">
+      <ellipse cx="78" cy="78" rx="65" ry="73" fill="url(#fur)" stroke="#245c58" stroke-width="7"/>
+      <ellipse cx="78" cy="88" rx="27" ry="31" fill="url(#emerald)"/>
+      <circle cx="48" cy="57" r="13" fill="#12d8bd"/>
+      <circle cx="71" cy="44" r="13" fill="#30efd2"/>
+      <circle cx="96" cy="44" r="13" fill="#30efd2"/>
+      <circle cx="119" cy="58" r="13" fill="#12d8bd"/>
+    </g>
+    <path d="M232 405 Q322 446 412 405" fill="none" stroke="#d7e4e4" stroke-width="18" stroke-linecap="round"/>
+    <path d="M232 405 Q322 446 412 405" fill="none" stroke="#243b40" stroke-width="8" stroke-linecap="round"/>
+    <path d="M292 432 L322 419 L352 432 L344 474 L322 490 L300 474Z" fill="#eef9f8" stroke="#283d42" stroke-width="7"/>
+    <path d="M310 465 V442 L334 466 V442" fill="none" stroke="#00bfa6" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <g fill="#43e8d1" opacity="0.8">
+    <rect x="83" y="219" width="8" height="8" rx="2"/>
+    <rect x="547" y="275" width="11" height="11" rx="2"/>
+    <path d="M109 168 l7 15 15 7-15 7-7 15-7-15-15-7 15-7z"/>
+    <path d="M533 174 l5 11 11 5-11 5-5 11-5-11-11-5 11-5z"/>
+  </g>
+</svg>
