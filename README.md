@@ -1,10 +1,20 @@
-# Nilo
+<div align="center">
+  <img src="docs/assets/nilo-icon.svg" alt="Nilo icon" width="104" />
+  <br />
+  <img src="docs/assets/nilo-logo.svg" alt="Nilo" width="430" />
+  <p><strong>Write simply. Create freely.</strong></p>
+  <p>A small, readable programming language implemented in Rust.</p>
+  <p>
+    <a href="README.ja.md">日本語</a> ·
+    <a href="docs/LANGUAGE.md">Language guide</a> ·
+    <a href="docs/PACKAGES.md">Packages</a> ·
+    <a href="docs/BRAND.md">Brand kit</a>
+  </p>
+</div>
 
-Nilo is a small, readable programming language implemented in Rust. It ships as a single `nilo` command with an interpreter, persistent REPL, module system, runtime-checked type annotations, project manifests, tests, and developer inspection tools.
+Nilo ships as a single `nilo` command with an interpreter, persistent REPL, module system, runtime-checked type annotations, project manifests, tests, and developer inspection tools.
 
 > **Status:** Nilo 0.2 is an alpha language. The syntax and standard library are usable for experiments and small tools, but compatibility may change before 1.0.
-
-Japanese documentation: [README.ja.md](README.ja.md)
 
 ## Install
 
@@ -85,6 +95,23 @@ print(json.stringify({
 - source-aware diagnostics with line and column excerpts
 - CLI runner, persistent REPL, project initializer, test runner, token dump, and AST dump
 
+## Meet Niro
+
+<table>
+  <tr>
+    <td width="62%" valign="middle">
+      <h3>Niro, the official Nilo mascot</h3>
+      <p>Niro is a curious black cat who explores code, discovers ideas, and has a talent for finding bugs. The glowing forehead <strong>N</strong>, emerald eyes, paws, and tail tip connect Niro directly to the Nilo visual identity.</p>
+      <p>Niro appears in documentation, tutorials, community artwork, and release communication while keeping the language friendly and approachable.</p>
+      <p><a href="docs/prompts/niro-mascot.md">Mascot generation prompt</a> · <a href="docs/BRAND.md">Brand guidelines</a></p>
+      <blockquote><strong>Write simply. Create freely.</strong></blockquote>
+    </td>
+    <td width="38%" align="center" valign="middle">
+      <img src="docs/assets/niro-mascot.svg" alt="Niro, the black-cat mascot of Nilo" width="300" />
+    </td>
+  </tr>
+</table>
+
 ## Command line
 
 ```text
@@ -136,6 +163,16 @@ cargo run -- test tests
 ```
 
 The implementation is intentionally split into lexer, parser, AST, values, environment, interpreter, standard library, and CLI modules so the language can grow toward bytecode or native compilation without replacing its front end.
+
+## Brand assets
+
+The official wordmark, square icon, mascot artwork, palette, and generation prompt are maintained in the repository:
+
+- [Nilo wordmark](docs/assets/nilo-logo.svg)
+- [Nilo icon](docs/assets/nilo-icon.svg)
+- [Niro mascot](docs/assets/niro-mascot.svg)
+- [Brand guide](docs/BRAND.md)
+- [Niro generation prompt](docs/prompts/niro-mascot.md)
 
 ## License
 
