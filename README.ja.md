@@ -141,15 +141,6 @@ entry = "src/main.nilo"
 main = "src/main.nilo"
 ```
 
-```text
-my-app/
-├── Nilo.toml
-├── src/
-│   └── main.nilo
-└── tests/
-    └── main_test.nilo
-```
-
 詳細は[言語ガイド](docs/LANGUAGE.md)と[パッケージガイド](docs/PACKAGES.md)を参照してください。
 
 ## 開発
@@ -177,3 +168,5 @@ cargo run -- test tests
 ## ライセンス
 
 MIT
+
+<p align="center"><sub>© 2026 Taeko Nomaguchi. All Rights Reserved.</sub></p>
