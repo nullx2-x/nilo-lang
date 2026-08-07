@@ -174,6 +174,14 @@ The official wordmark, square icon, mascot artwork, palette, and generation prom
 - [Brand guide](docs/BRAND.md)
 - [Niro generation prompt](docs/prompts/niro-mascot.md)
 
+## Support Nilo / Niro
+
+You can support the development of Nilo and its official mascot, Niro, by using the official LINE stickers.
+
+🐈‍⬛ **[Niro LINE Stickers](https://line.me/S/sticker/35567765)**
+
+Your support helps fund continued development, character artwork, and future Nilo projects.
+
 ## License
 
 MIT
