@@ -165,6 +165,14 @@ cargo run -- test tests
 - [ブランドガイド](docs/BRAND.md)
 - [ニロ生成プロンプト](docs/prompts/niro-mascot.md)
 
+## Nilo / Niro の開発を応援
+
+Niloの開発や、公式マスコット「ニロ」の活動を応援したい方は、LINEスタンプを使っていただけると開発支援になります。
+
+🐈‍⬛ **[ニロのLINEスタンプ](https://line.me/S/sticker/35567765)**
+
+スタンプを使っていただくことが、Niloの開発・キャラクター制作・今後の活動継続の支援につながります。
+
 ## ライセンス
 
 MIT
